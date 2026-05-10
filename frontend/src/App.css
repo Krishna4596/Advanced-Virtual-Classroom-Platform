@@ -1,0 +1,55 @@
+/**
+ * ============================================================
+ * 🎨 TITAN GLOBAL STYLING ARCHITECTURE (v4.2)
+ * Ref: Report Section 3.7 (Utility-First Design)
+ * Purpose: Global directives and hardware-accelerated transitions.
+ * ============================================================
+ */
+
+/* 🚀 Tailwind v4 Neural Import */
+@import "tailwindcss";
+
+/* 🛰️ NEURAL SCROLLBAR PROTOCOL: For Industrial Dashboards */
+@layer base {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #020617;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 100px;
+    border: 1px solid #020617;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3b82f6; /* Blue-500 Signal */
+  }
+
+  /* 🌌 Global Neural Transitions */
+  * {
+    @apply transition-colors duration-300;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* 🌀 NEURAL_GATEWAY_ANIMATION */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* 🧪 GLASS_MORPHISM_BUFFER */
+.glass {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}

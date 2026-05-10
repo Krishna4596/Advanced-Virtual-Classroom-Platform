@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- 🏛️ INSTITUTIONAL IDENTITY -->
+    <title>AVCP | Neural Learning Framework</title>
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- 🛰️ SYSTEM TELEMETRY META -->
+    <meta name="theme-color" content="#020617">
+    <meta name="description" content="AVCP: Advanced MERN-powered Virtual Classroom with Real-time Neural Sync and Guardian Telemetry." />
+    <meta name="author" content="Krishna Prajapat">
+
+    <!-- 📐 TYPOGRAPHY CLUSTER -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+      :root {
+        --bg-dark: #020617;
+        --accent-blue: #2563eb;
+        --slate-node: #1e293b;
+      }
+
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-dark);
+        color: #f8fafc;
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+        height: 100%;
+      }
+
+      /* 🌀 TITAN NEURAL INITIALIZER (Pre-React Load) */
+      #root:empty {
+        background-color: var(--bg-dark);
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #root:empty::after {
+        content: "TITAN / AVCP";
+        font-family: 'Poppins', sans-serif;
+        font-weight: 900;
+        font-size: 2rem;
+        letter-spacing: 1rem;
+        color: var(--accent-blue);
+        text-shadow: 0 0 40px rgba(37, 99, 235, 0.4);
+        animation: neuralPulse 1.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        text-transform: uppercase;
+        font-style: italic;
+      }
+
+      @keyframes neuralPulse {
+        0%, 100% { opacity: 0.1; transform: scale(0.95); letter-spacing: 0.8rem; }
+        50% { opacity: 1; transform: scale(1); letter-spacing: 1.2rem; }
+      }
+
+      /* 💎 INDUSTRIAL SCROLLBAR */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: var(--bg-dark); }
+      ::-webkit-scrollbar-thumb { background: var(--slate-node); border-radius: 100px; border: 2px solid var(--bg-dark); }
+      ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+    </style>
+  </head>
+
+  <body>
+    <!-- 🚀 PRIMARY NEURAL NODE -->
+    <div id="root"></div>
+
+    <!-- 🏗️ SYSTEM ASSEMBLY SCRIPT -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- 🛡️ SECURITY FALLBACK -->
+    <noscript>
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; color: white; background: #020617; height: 100vh; font-family: 'Inter', sans-serif;">
+        <div style="width: 80px; height: 80px; background: rgba(37, 99, 235, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; border: 2px solid #2563eb;">
+           <span style="font-size: 40px;">⚠️</span>
+        </div>
+        <h1 style="color: #2563eb; font-size: 2.5rem; margin-bottom: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px;">Handshake Denied</h1>
+        <h2 style="font-weight: 800; margin-bottom: 25px; color: #f8fafc;">JavaScript is Offline</h2>
+        <p style="color: #64748b; max-width: 450px; line-height: 1.8; font-style: italic;">
+          AVCP Neural Core requires an active JavaScript environment to initialize real-time classroom nodes and biometric telemetry. 
+          Please enable it in your security settings to establish link.
+        </p>
+      </div>
+    </noscript>
+  </body>
+</html>

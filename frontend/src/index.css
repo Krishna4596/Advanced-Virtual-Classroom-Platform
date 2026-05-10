@@ -1,0 +1,145 @@
+/**
+ * ============================================================
+ * 🌌 TITAN NEURAL DESIGN SYSTEM (v5.1 - Universal Liquid Build)
+ * Upgrades: Fluid Typography, WCAG Touch Targets, Safe Areas, 
+ * Keyboard Accessibility, Mobile Notch Protection, and 
+ * PWA Native-App Anti-Bounce physics.
+ * ============================================================
+ */
+
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* 🔥 1. FLUID TYPOGRAPHY: Scales smoothly between 14px (mobile) and 18px (desktop) */
+    font-size: clamp(14px, 1vw + 10px, 18px); 
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  body {
+    @apply bg-[#020617] text-slate-100 antialiased overflow-x-hidden selection:bg-blue-600/50 selection:text-white;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    
+    /* 🔥 2. MOBILE NOTCH PROTECTION: Prevents content from hiding under mobile status bars */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+
+    /* Mobile tap highlight reset for a native app feel */
+    -webkit-tap-highlight-color: transparent; 
+    
+    /* 🚀 PRO-TIP: Prevents the annoying "Pull-to-refresh" bounce effect on mobile browsers */
+    overscroll-behavior-y: none;
+  }
+
+  /* 🔥 3. ACCESSIBILITY (a11y): Clear focus rings for keyboard navigation */
+  *:focus-visible {
+    outline: 3px solid #3b82f6; /* Tailwind blue-500 */
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  /* 📐 TITAN INPUT RESET: Fixing the "Text-Sliding" issue */
+  input, textarea {
+    @apply leading-normal; 
+  }
+
+  /* 💎 Industrial Scrollbar: Cyber-Hub Edition */
+  ::-webkit-scrollbar {
+    /* Responsive scrollbar width */
+    width: clamp(6px, 1vw, 10px); 
+    height: clamp(6px, 1vw, 10px);
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-[#01040a];
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full border-[2px] md:border-[3px] border-[#020617];
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.4)];
+  }
+}
+
+/* ================= 🌌 NEURAL GLASS PRO (v2.0) ================= */
+.glass {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px) saturate(190%);
+  -webkit-backdrop-filter: blur(16px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  @apply shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+  .glass {
+    backdrop-filter: blur(28px) saturate(210%);
+    border: 1.5px solid rgba(255, 255, 255, 0.07);
+    @apply shadow-[0_30px_70px_rgba(0,0,0,0.6)];
+  }
+}
+
+.glass:hover {
+  border-color: rgba(37, 99, 235, 0.25);
+  @apply shadow-[0_40px_90px_rgba(0,0,0,0.7)];
+}
+
+/* ================= 🕹️ INDUSTRIAL COMMAND UTILITIES ================= */
+.btn {
+  /* 🔥 4. TOUCH TARGETS (WCAG Standard): Minimum 48px height for easy tapping on mobile */
+  min-height: 48px;
+  min-width: 48px;
+  /* 🚀 PRO-TIP: Removes the 300ms tap delay on mobile devices */
+  touch-action: manipulation;
+  @apply px-6 py-4 md:px-12 md:py-6 rounded-2xl md:rounded-[2.5rem] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-[10px] md:text-[12px] transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 select-none cursor-pointer italic;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-500 shadow-[0_10px_30px_rgba(37,99,235,0.2)] border-2 border-blue-400/10;
+}
+
+/* 🔥 TITAN INPUT NEURAL: Fixed font-rendering & Touch Targets */
+.input-neural {
+  min-height: 48px; /* WCAG Minimum */
+  @apply w-full bg-slate-950/40 backdrop-blur-xl border-2 border-slate-900 rounded-2xl md:rounded-[2rem] px-6 py-4 md:px-10 md:py-6 text-base md:text-xl font-black text-white outline-none focus:border-blue-600 focus:bg-slate-900 transition-all placeholder:text-slate-800 shadow-inner;
+  font-style: normal; 
+}
+
+.input-neural::placeholder {
+  font-style: italic;
+}
+
+/* ================= ⚡ MOTION ARCHITECTURE ================= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes neuralPulse {
+  0%, 100% { opacity: 0.1; transform: scale(1); filter: blur(100px); }
+  50% { opacity: 0.3; transform: scale(1.1); filter: blur(150px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.neural-aura {
+  animation: neuralPulse 10s infinite ease-in-out;
+}
+
+/* 📱 Accessibility: Safe Motion for users with vestibular disorders */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
