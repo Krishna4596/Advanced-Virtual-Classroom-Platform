@@ -1,6 +1,7 @@
 /**
  * ============================================================
- * 📹 TITAN VIDEO STAGE (v11.1 - The "Zoom-Killer" Auto-Grid Build)
+ * 📹 TITAN VIDEO STAGE (v11.2 - The "Zoom-Killer" Auto-Grid Build)
+ * Fixes: Chat Button moved to Command Deck, controlled Drawer.
  * Features: Auto-Scaling CSS Grid, Mobile Drawer Chat, Spotlight,
  * Global Hand Raise Sync, and Thumbnail Strip for Pinned mode.
  * ============================================================
@@ -104,7 +105,7 @@ function VideoRoom() {
   const isMyHandRaised = !!raisedHands[myId];
 
   // HUD State Toggles
-  const [isChatOpen, setIsChatOpen] = useState(false); 
+  const [isChatOpen, setIsChatOpen] = useState(false); // Default is false, will not open automatically
   const [isBoardOpen, setIsBoardOpen] = useState(false);
   const [isPollsOpen, setIsPollsOpen] = useState(false);
   
@@ -289,9 +290,7 @@ function VideoRoom() {
             </div>
           </div>
           
-          <button onClick={() => setIsChatOpen(!isChatOpen)} className={`p-3 rounded-xl transition-all shrink-0 border border-white/10 pointer-events-auto ${isChatOpen ? 'bg-blue-600 shadow-lg shadow-blue-600/20' : 'bg-black/50 backdrop-blur-md hover:bg-slate-800'}`}>
-            <MessageSquare size={18} />
-          </button>
+          {/* Removed Chat Button from Header */}
         </header>
 
         {peerError && (
@@ -363,37 +362,42 @@ function VideoRoom() {
 
         {/* 🎛️ COMMAND DECK: Floating Controls */}
         <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-auto">
-          <div className="bg-slate-950/80 backdrop-blur-2xl px-4 sm:px-6 py-3 rounded-3xl border border-white/10 flex items-center justify-center gap-3 sm:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+          <div className="bg-slate-950/80 backdrop-blur-2xl px-2 sm:px-6 py-2 sm:py-3 rounded-[2rem] sm:rounded-3xl border border-white/10 flex items-center justify-center gap-1 sm:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-x-auto max-w-[90vw]">
             
+            {/* Added Chat Button to Command Deck */}
+            <button onClick={() => setIsChatOpen(!isChatOpen)} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isChatOpen ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Toggle Chat">
+              <MessageSquare size={18} className="sm:w-5 sm:h-5" />
+            </button>
+
             {!isPTMMode && (
-              <button onClick={toggleHandRaise} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isMyHandRaised ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Raise Hand">
-                <Hand size={20} />
+              <button onClick={toggleHandRaise} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isMyHandRaised ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Raise Hand">
+                <Hand size={18} className="sm:w-5 sm:h-5" />
               </button>
             )}
 
-            <button onClick={() => setIsBoardOpen(!isBoardOpen)} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isBoardOpen ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Neural Board">
-              <PenTool size={20} />
+            <button onClick={() => setIsBoardOpen(!isBoardOpen)} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isBoardOpen ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Neural Board">
+              <PenTool size={18} className="sm:w-5 sm:h-5" />
             </button>
             
             {!isPTMMode && (
-              <button onClick={() => setIsPollsOpen(!isPollsOpen)} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isPollsOpen ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Intel Polls">
-                <BarChart2 size={20} />
+              <button onClick={() => setIsPollsOpen(!isPollsOpen)} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isPollsOpen ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Intel Polls">
+                <BarChart2 size={18} className="sm:w-5 sm:h-5" />
               </button>
             )}
 
-            <div className="w-[1px] h-8 bg-white/10 mx-1 hidden xs:block"></div>
+            <div className="w-[1px] h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1 hidden xs:block"></div>
 
-            <button onClick={toggleMic} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isMicOn ? 'bg-slate-800 text-white' : 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]'}`}>
-              {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
+            <button onClick={toggleMic} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isMicOn ? 'bg-slate-800 text-white' : 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]'}`}>
+              {isMicOn ? <Mic size={18} className="sm:w-5 sm:h-5" /> : <MicOff size={18} className="sm:w-5 sm:h-5" />}
             </button>
-            <button onClick={toggleCam} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isCamOn ? 'bg-slate-800 text-white' : 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]'}`}>
-              {isCamOn ? <Video size={20} /> : <VideoOff size={20} />}
+            <button onClick={toggleCam} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isCamOn ? 'bg-slate-800 text-white' : 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]'}`}>
+              {isCamOn ? <Video size={18} className="sm:w-5 sm:h-5" /> : <VideoOff size={18} className="sm:w-5 sm:h-5" />}
             </button>
             
-            <div className="w-[1px] h-8 bg-white/10 mx-1"></div>
+            <div className="w-[1px] h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1"></div>
             
-            <button onClick={handleTerminateSession} className="bg-red-600 hover:bg-red-500 p-3 sm:p-4 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-lg shadow-red-600/20" title="End Link">
-              <PhoneOff size={20} className="text-white" />
+            <button onClick={handleTerminateSession} className="bg-red-600 hover:bg-red-500 p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-lg shadow-red-600/20" title="End Link">
+              <PhoneOff size={18} className="sm:w-5 sm:h-5 text-white" />
             </button>
           </div>
         </footer>
@@ -413,11 +417,12 @@ function VideoRoom() {
       )}
 
       {/* 🔥 FIX: RIGHT SIDEBAR: CHAT Drawer Mobile Ready */}
-      <aside className={`absolute top-0 right-0 h-full w-full sm:w-[350px] lg:w-[400px] bg-slate-950 border-l border-white/5 z-[100] transition-transform duration-500 ease-in-out ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        {/* Mobile/Desktop Close Button over the Chat drawer */}
-        <button onClick={() => setIsChatOpen(false)} className="absolute top-4 left-4 sm:-left-12 bg-slate-800 p-3 rounded-full sm:rounded-l-xl z-[101] shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:bg-slate-700 transition lg:hidden">
+      <aside className={`absolute top-0 right-0 h-full w-[85%] max-w-[400px] bg-slate-950 border-l border-white/5 z-[100] transition-transform duration-500 ease-in-out ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* Mobile Close Button over the Chat drawer */}
+        <button onClick={() => setIsChatOpen(false)} className="absolute top-4 -left-12 bg-slate-800 p-3 rounded-l-xl z-[101] shadow-[[-10px_0_20px_rgba(0,0,0,0.5)]] flex items-center justify-center hover:bg-slate-700 transition lg:hidden">
           <X className="text-white w-5 h-5" />
         </button>
+        {/* Close button for Desktop inside the header if needed, but 'X' handles mobile */}
         <Chat classId={roomId} />
       </aside>
 
