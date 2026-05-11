@@ -1,9 +1,8 @@
 /**
  * ============================================================
- * 📊 TITAN INTELLIGENCE HUB (v4.6 - Ultimate Fluid Build)
- * Fix: "image_bcc2d8.png" squishing solved.
- * Upgrade: MetricCards now use auto-fit grids to wrap 
- * elegantly on smaller screens/split views instead of crashing.
+ * 📊 TITAN INTELLIGENCE HUB (v4.7 - Ultra Fluid Live Build)
+ * Fix: Data parsing for live graph and absolute anti-squishing
+ * Upgrade: Bulletproof Responsive Grid & Recharts scaling.
  * ============================================================
  */
 
@@ -35,25 +34,30 @@ function GlobalAnalytics() {
         
         const [classRes, trendRes] = await Promise.all([
           API.get("/classes/all-analytics").catch(() => ({ data: {} })),
-          API.get("/attendance/trend").catch(() => ({ data: { data: [] } }))
+          API.get("/attendance/trend").catch(() => ({ data: [] })) // Defaulting to [] directly
         ]);
 
         const classData = classRes.data || {};
-        const trendData = trendRes.data?.data || [];
+        // Safely extract data, whether backend sends { data: [...] } or just [...]
+        const rawTrendData = Array.isArray(trendRes.data) ? trendRes.data : trendRes.data?.data || [];
 
-        const formattedGraph = trendData.map(item => ({
-            name: item.date.toUpperCase(),
-            value: item.count
-        }));
+        let formattedGraph = [];
+        if (rawTrendData.length > 0) {
+            formattedGraph = rawTrendData.map(item => ({
+                // Safely handle missing date/count fields
+                name: (item.date || "N/A").toString().toUpperCase().substring(0,3), 
+                value: item.count || 0
+            }));
+        }
 
         setStats({
           totalStudents: classData.totalStudents || 0,
-          avgAttendance: 94,
+          avgAttendance: classData.avgAttendance || 94, // Try to get real avg, else fallback
           graphData: formattedGraph
         });
 
       } catch (err) {
-        console.error("❌ ANALYTICS_SYNC_FAILURE: Performance node unreachable.");
+        console.error("❌ ANALYTICS_SYNC_FAILURE: Performance node unreachable.", err);
       } finally {
         setLoading(false);
       }
@@ -81,7 +85,6 @@ function GlobalAnalytics() {
   );
 
   return (
-    // 🔥 FIX 1: Slightly reduced extreme padding on small screens
     <div className="animate-in fade-in duration-700 p-4 sm:p-6 md:p-10 space-y-6 md:space-y-12 selection:bg-blue-600/30 max-w-[1900px] mx-auto min-h-screen overflow-x-hidden pb-20">
       
       {/* 🚀 COMMAND CENTER HEADER */}
@@ -90,13 +93,12 @@ function GlobalAnalytics() {
         <div className="space-y-3 sm:space-y-4 relative z-10 w-full text-left">
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="bg-blue-600 w-2 md:w-2.5 h-10 sm:h-16 rounded-full shadow-[0_0_40px_rgba(37,99,235,0.4)] shrink-0"></div>
-            {/* Clamp used to smoothly shrink header text */}
             <h1 className="text-[clamp(2.5rem,5vw,6rem)] font-black tracking-tighter text-white uppercase italic leading-none break-words">Intelligence Hub</h1>
           </div>
           <div className="flex items-center gap-3 md:gap-4 ml-1 md:ml-2">
              <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-emerald-500 rounded-full animate-ping shrink-0"></div>
              <p className="text-slate-500 font-black text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.3em] sm:tracking-[0.5em] italic leading-none break-words">
-               Command_Protocol: <span className="text-blue-500">GLOBAL_OBSERVER_V4.6</span>
+                Command_Protocol: <span className="text-blue-500">GLOBAL_OBSERVER_V4.7</span>
              </p>
           </div>
         </div>
@@ -112,8 +114,8 @@ function GlobalAnalytics() {
       </header>
 
       {/* 📊 TELEMETRY METRICS GRID */}
-      {/* 🔥 FIX 2: Dynamic Auto-Fit Grid ensures cards NEVER squish. They wrap instead! */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 sm:gap-6 md:gap-8">
+      {/* 🔥 Anti-squish: Added specific w-full on cards and refined minmax */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 sm:gap-6 md:gap-8">
         <MetricCard title="Total Enrollment" value={stats.totalStudents} change="REAL_TIME" icon={<Users className="w-6 h-6 md:w-8 md:h-8"/>} color="text-blue-500" />
         <MetricCard title="Avg Presence" value={`${stats.avgAttendance}%`} change="SYNCING" icon={<Activity className="w-6 h-6 md:w-8 md:h-8"/>} color="text-emerald-500" />
         <MetricCard title="Merit Status" value="ALPHA" change="STABLE" icon={<Award className="w-6 h-6 md:w-8 md:h-8"/>} color="text-yellow-500" />
@@ -123,18 +125,21 @@ function GlobalAnalytics() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-10">
         
         {/* 📈 ANALYTICS FLUX (Chart) */}
-        <div className="xl:col-span-8 bg-slate-950/40 backdrop-blur-2xl p-5 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3rem] border-2 border-slate-900 shadow-3xl space-y-6 md:space-y-8 relative overflow-hidden">
-           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-slate-900 pb-4 sm:pb-6">
+        <div className="xl:col-span-8 bg-slate-950/40 backdrop-blur-2xl p-4 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3rem] border-2 border-slate-900 shadow-3xl space-y-6 md:space-y-8 relative overflow-hidden flex flex-col">
+           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-slate-900 pb-4 sm:pb-6 shrink-0">
               <div className="space-y-2 md:space-y-3">
                   <h3 className="text-2xl sm:text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">Engagement Flux</h3>
                   <div className="flex items-center gap-2 md:gap-4">
                      <Zap size={12} className="md:w-3.5 md:h-3.5 text-blue-500 animate-pulse shrink-0" />
-                     <p className="text-[8px] sm:text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] italic truncate">Telemetry_Stream: Verified</p>
+                     <p className="text-[8px] sm:text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] italic truncate">
+                        Telemetry_Stream: {stats.graphData.length > 0 ? "Live" : "Fallback"}
+                     </p>
                   </div>
               </div>
            </div>
 
-           <div className="w-full h-[250px] sm:h-[400px] md:h-[450px]">
+           {/* 🔥 Responsive Graph Container */}
+           <div className="w-full flex-1 min-h-[250px] sm:min-h-[350px] md:min-h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={stats.graphData.length > 0 ? stats.graphData : fallbackData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
@@ -144,10 +149,10 @@ function GlobalAnalytics() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                  <XAxis dataKey="name" stroke="#475569" fontSize={9} axisLine={false} tickLine={false} dy={10} />
-                  <YAxis stroke="#475569" fontSize={9} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="name" stroke="#475569" fontSize={10} axisLine={false} tickLine={false} dy={10} minTickGap={10} />
+                  <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} width={40} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#020617', borderRadius: '16px', border: '1px solid #1e293b', color: '#fff', fontWeight: 'black', fontSize: '10px', textTransform: 'uppercase' }}
+                    contentStyle={{ backgroundColor: '#020617', borderRadius: '12px', border: '1px solid #1e293b', color: '#fff', fontWeight: 'black', fontSize: '11px', textTransform: 'uppercase' }}
                   />
                   <Area type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorEng)" />
                 </AreaChart>
@@ -157,7 +162,7 @@ function GlobalAnalytics() {
 
         {/* 🏛️ GUARDIAN SYNC MONITOR */}
         <div className="xl:col-span-4 flex flex-col gap-6 md:gap-8">
-           <div className="bg-slate-950/60 p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3rem] border-2 border-blue-500/10 space-y-8 relative overflow-hidden shadow-3xl text-center backdrop-blur-xl">
+           <div className="bg-slate-950/60 p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3rem] border-2 border-blue-500/10 space-y-8 relative overflow-hidden shadow-3xl text-center backdrop-blur-xl h-full flex flex-col justify-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600/10 border-2 border-blue-500/20 rounded-[1.5rem] flex items-center justify-center mx-auto shadow-3xl shrink-0">
                   <BellRing className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 animate-pulse" />
               </div>
@@ -178,11 +183,11 @@ function GlobalAnalytics() {
               </div>
            </div>
 
-           <div className="bg-slate-950/80 p-6 sm:p-8 rounded-[2rem] sm:rounded-[3rem] border-2 border-slate-900 flex items-center justify-center sm:justify-start gap-4 sm:gap-6 group hover:border-emerald-500/30 transition-all duration-700 shadow-3xl text-center sm:text-left">
+           <div className="bg-slate-950/80 p-6 sm:p-8 rounded-[2rem] sm:rounded-[3rem] border-2 border-slate-900 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 group hover:border-emerald-500/30 transition-all duration-700 shadow-3xl text-center sm:text-left shrink-0">
               <div className="p-4 sm:p-5 bg-emerald-500/10 text-emerald-500 rounded-2xl shadow-2xl border border-emerald-500/20 shrink-0"><ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8"/></div>
               <div className="space-y-1 sm:space-y-1.5">
                 <p className="text-[9px] sm:text-[10px] font-black text-slate-600 uppercase tracking-widest sm:tracking-[0.4em] italic">Encryption</p>
-                <p className="text-lg sm:text-xl font-black text-emerald-500 uppercase italic leading-none">AES-256 SYNCED</p>
+                <p className="text-lg sm:text-xl font-black text-emerald-500 uppercase italic leading-none break-words">AES-256 SYNCED</p>
               </div>
            </div>
         </div>
@@ -192,21 +197,19 @@ function GlobalAnalytics() {
   );
 }
 
-// 🔥 FIX 3: Fully Liquid Metric Card
+// 🔥 Fully Liquid Metric Card
 function MetricCard({ title, value, change, icon, color }) {
   return (
-    <div className="bg-slate-950/40 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-900 hover:border-blue-500/30 transition-all duration-700 group shadow-3xl relative overflow-hidden flex flex-col justify-between h-full">
-      <div className="flex flex-wrap justify-between items-start mb-6 gap-3">
+    <div className="w-full bg-slate-950/40 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-900 hover:border-blue-500/30 transition-all duration-700 group shadow-3xl relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+      <div className="flex flex-wrap justify-between items-start mb-4 gap-3 shrink-0">
         <div className={`p-4 bg-slate-950 rounded-2xl border border-white/5 group-hover:scale-110 transition-all duration-500 shadow-3xl shrink-0 ${color}`}>{icon}</div>
-        <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-black text-[8px] sm:text-[9px] uppercase tracking-widest italic shadow-inner shrink-0">
+        <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-black text-[8px] sm:text-[9px] uppercase tracking-widest italic shadow-inner shrink-0 mt-1">
            {change}
         </div>
       </div>
       <div className="space-y-2 mt-auto">
         <h4 className="text-[9px] sm:text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] sm:tracking-[0.3em] italic break-words">{title}</h4>
-        
-        {/* Clamp handles large numbers, break-words is a fallback */}
-        <p className={`text-[clamp(2rem,4vw,3.5rem)] font-black text-white tracking-tighter italic leading-none break-words group-hover:text-blue-500 transition-colors duration-500 ${color}`}>{value}</p>
+        <p className={`text-[clamp(1.8rem,4vw,3.5rem)] font-black text-white tracking-tighter italic leading-none break-all sm:break-words group-hover:text-blue-500 transition-colors duration-500 ${color}`}>{value}</p>
       </div>
     </div>
   );

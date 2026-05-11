@@ -1,7 +1,7 @@
 /**
  * ============================================================
- * 📹 TITAN VIDEO STAGE (v11.0 - The "Zoom-Killer" Build)
- * Features: Spotlight (Pin/Zoom Video), Instructor Kick Power,
+ * 📹 TITAN VIDEO STAGE (v11.1 - The "Zoom-Killer" Auto-Grid Build)
+ * Features: Auto-Scaling CSS Grid, Mobile Drawer Chat, Spotlight,
  * Global Hand Raise Sync, and Thumbnail Strip for Pinned mode.
  * ============================================================
  */
@@ -94,7 +94,7 @@ function VideoRoom() {
   // 🎥 STREAMS & LAYOUT STATE
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]); 
-  const [pinnedStreamId, setPinnedStreamId] = useState(null); // 🔥 For Zoom/Spotlight feature
+  const [pinnedStreamId, setPinnedStreamId] = useState(null); 
   
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCamOn, setIsCamOn] = useState(true);
@@ -132,7 +132,6 @@ function VideoRoom() {
     setRaisedHands(prev => ({ ...prev, [myId]: newState }));
     const socket = getSocket();
     if (socket) {
-      // 🔥 Emit Global Hand Raise
       socket.emit("toggle_hand_raise", { roomId, userId: myId, isRaised: newState });
     }
   };
@@ -149,9 +148,8 @@ function VideoRoom() {
 
     const socket = getSocket();
     if (socket) {
-      socket.emit("kick_user", { roomId, userId }); // Trigger kick
+      socket.emit("kick_user", { roomId, userId }); 
     }
-    // Remove locally immediately for snappy UI
     setRemoteStreams(prev => prev.filter(p => p.id !== userId));
     if (pinnedStreamId === userId) setPinnedStreamId(null);
   };
@@ -161,7 +159,7 @@ function VideoRoom() {
     else setPinnedStreamId(id);
   };
 
-  // 📡 ADD OR REMOVE REMOTE STREAMS EFFICIENTLY
+  // 📡 ADD OR REMOVE REMOTE STREAMS
   const addRemoteStream = (peerId, stream, name) => {
     setRemoteStreams(prev => {
       if (prev.find(p => p.id === peerId)) return prev; 
@@ -174,7 +172,7 @@ function VideoRoom() {
     if (pinnedStreamId === peerId) setPinnedStreamId(null);
   };
 
-  // --- Logic: WebRTC & Socket Sequence ---
+  // --- WebRTC & Socket Sequence ---
   useEffect(() => {
     if (!user) return;
     let myStream = null;
@@ -201,7 +199,6 @@ function VideoRoom() {
           if (socket) {
             socket.emit("join_video_room", { roomId, user: { id: myId, name: user.name, role: user.role } });
 
-            // 👢 Listen for Kick Event
             socket.on("user_kicked", ({ userId }) => {
               if (userId === myId) {
                 alert("🛑 You have been removed from the session by the Instructor.");
@@ -211,12 +208,10 @@ function VideoRoom() {
               }
             });
 
-            // ✋ Listen for Global Hand Raises
             socket.on("hand_raise_updated", ({ userId, isRaised }) => {
               setRaisedHands(prev => ({ ...prev, [userId]: isRaised }));
             });
 
-            // 📊 Auto-open polls for students
             const handleIncomingPoll = () => {
               if (!isTeacher) {
                 setIsBoardOpen(false);
@@ -273,12 +268,6 @@ function VideoRoom() {
   ];
 
   const totalNodes = allNodes.length;
-  let gridLayoutClass = "grid-cols-1 max-w-4xl"; 
-  if (totalNodes === 2) gridLayoutClass = "grid-cols-1 md:grid-cols-2 max-w-6xl";
-  else if (totalNodes === 3 || totalNodes === 4) gridLayoutClass = "grid-cols-2 max-w-5xl";
-  else if (totalNodes > 4 && totalNodes <= 6) gridLayoutClass = "grid-cols-2 lg:grid-cols-3 max-w-6xl";
-  else if (totalNodes > 6) gridLayoutClass = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-7xl";
-
   const pinnedNodeObj = pinnedStreamId ? allNodes.find(n => n.id === pinnedStreamId) : null;
 
   return (
@@ -317,7 +306,6 @@ function VideoRoom() {
           {pinnedNodeObj ? (
             /* 🔍 SPOTLIGHT VIEW (Pinned) */
             <div className="w-full h-full flex flex-col items-center justify-center p-4 gap-6">
-              {/* Main Large Video */}
               <div className="flex-1 w-full max-w-6xl max-h-[70vh] flex justify-center">
                  <VideoNode 
                    {...pinnedNodeObj} 
@@ -328,7 +316,6 @@ function VideoRoom() {
                  />
               </div>
               
-              {/* Thumbnail Strip (Bottom) */}
               <div className="w-full max-w-6xl overflow-x-auto custom-scrollbar flex gap-4 pb-4 px-2 shrink-0 h-32 sm:h-40">
                 {allNodes.filter(n => n.id !== pinnedStreamId).map((node) => (
                   <div key={node.id} className="h-full aspect-video shrink-0">
@@ -344,10 +331,15 @@ function VideoRoom() {
               </div>
             </div>
           ) : (
-            /* 🔲 GALLERY VIEW (Grid) */
-            <div className={`w-full max-w-7xl h-full p-4 sm:p-6 md:p-10 grid gap-4 sm:gap-6 place-content-center items-center overflow-y-auto custom-scrollbar ${gridLayoutClass}`}>
+            /* 🔲 GALLERY VIEW (Auto-Scaling Grid) */
+            <div 
+               className="w-full max-w-7xl h-full p-4 sm:p-6 md:p-10 grid gap-4 sm:gap-6 items-center justify-center overflow-y-auto custom-scrollbar"
+               style={{ 
+                 gridTemplateColumns: `repeat(auto-fit, minmax(${totalNodes <= 2 ? '300px' : '200px'}, 1fr))` 
+               }}
+            >
               {allNodes.map((node) => (
-                <div key={node.id} className={`${totalNodes === 1 ? 'max-w-4xl mx-auto w-full' : ''}`}>
+                <div key={node.id} className={`w-full aspect-video ${totalNodes === 1 ? 'max-w-4xl mx-auto' : ''}`}>
                   <VideoNode 
                     {...node} 
                     isTeacherView={isTeacher} 
@@ -373,19 +365,16 @@ function VideoRoom() {
         <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-auto">
           <div className="bg-slate-950/80 backdrop-blur-2xl px-4 sm:px-6 py-3 rounded-3xl border border-white/10 flex items-center justify-center gap-3 sm:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
             
-            {/* ✋ Hand Raise Toggle */}
             {!isPTMMode && (
               <button onClick={toggleHandRaise} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isMyHandRaised ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Raise Hand">
                 <Hand size={20} />
               </button>
             )}
 
-            {/* Whiteboard Toggle */}
             <button onClick={() => setIsBoardOpen(!isBoardOpen)} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isBoardOpen ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Neural Board">
               <PenTool size={20} />
             </button>
             
-            {/* Polls Toggle */}
             {!isPTMMode && (
               <button onClick={() => setIsPollsOpen(!isPollsOpen)} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isPollsOpen ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Intel Polls">
                 <BarChart2 size={20} />
@@ -394,7 +383,6 @@ function VideoRoom() {
 
             <div className="w-[1px] h-8 bg-white/10 mx-1 hidden xs:block"></div>
 
-            {/* AV Controls */}
             <button onClick={toggleMic} className={`p-3 sm:p-4 rounded-2xl transition-all active:scale-90 ${isMicOn ? 'bg-slate-800 text-white' : 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]'}`}>
               {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
             </button>
@@ -424,10 +412,11 @@ function VideoRoom() {
         </div>
       )}
 
-      {/* RIGHT SIDEBAR: CHAT */}
-      <aside className={`fixed right-0 top-0 h-full w-full sm:w-[350px] lg:w-[400px] bg-slate-950 border-l border-white/5 z-[100] transition-transform duration-500 ease-in-out ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <button onClick={() => setIsChatOpen(false)} className="absolute top-4 left-[-48px] bg-blue-600 p-3 rounded-l-xl shadow-[-10px_0_20px_rgba(0,0,0,0.5)] lg:hidden flex items-center justify-center">
-          <ArrowRight className="text-white w-5 h-5" />
+      {/* 🔥 FIX: RIGHT SIDEBAR: CHAT Drawer Mobile Ready */}
+      <aside className={`absolute top-0 right-0 h-full w-full sm:w-[350px] lg:w-[400px] bg-slate-950 border-l border-white/5 z-[100] transition-transform duration-500 ease-in-out ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* Mobile/Desktop Close Button over the Chat drawer */}
+        <button onClick={() => setIsChatOpen(false)} className="absolute top-4 left-4 sm:-left-12 bg-slate-800 p-3 rounded-full sm:rounded-l-xl z-[101] shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:bg-slate-700 transition lg:hidden">
+          <X className="text-white w-5 h-5" />
         </button>
         <Chat classId={roomId} />
       </aside>
