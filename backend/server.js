@@ -15,7 +15,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
-const csurf = require("csurf");
 const { Server } = require("socket.io");
 const path = require("path");
 const cron = require("node-cron");
@@ -42,7 +41,7 @@ const startRedisMonitoring = require("./monitoring/redisMonitor");
 const { socketHandler } = require("./socket/socketHandler"); 
 
 const app = express();
-app.set("trust proxy", 1); // 🔥 FIX: Trust first proxy for secure cookies behind load balancers  
+app.set("trust proxy", 1); // Trust first proxy for secure cookies behind load balancers  
 const server = http.createServer(app);
 
 // 🔌 INFRASTRUCTURE: Database & Monitoring
@@ -65,9 +64,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(cors({
   origin: FRONTEND_URL,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  // 🔥 FIX 1: Frontend ko 'CSRF-Token' header bhejne ki permission de di
-  allowedHeaders: ["Content-Type", "Authorization", "CSRF-Token"]
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 }));
 
 app.use(express.json({ limit: "50mb" })); 
@@ -94,53 +91,21 @@ socketHandler(io);
 app.set("io", io); 
 
 /**
- * 🔑 CSRF_PROTOCOL: Guarding Neural Integrity
+ * 🛤️ API_NODE_MAPPING (CSRF Removed, JWT takes over)
  */
-// 🔥 FIX 2 & 3: Cookie check hata kar, header check lagaya
-/**
- * 🔑 CSRF_PROTOCOL: Guarding Neural Integrity
- */
-const csrfProtection = csurf({ 
-  cookie: {
-    httpOnly: true,
-    secure: true, // Render HTTPS par hai, isliye secure true zaroori hai
-    sameSite: 'none' // Vercel aur Render ke cross-domain connection ke liye
-  }, 
-  value: (req) => {
-    // Client se token is header se read karega
-    return req.headers['csrf-token']; 
-  }
-});
-
-/**
- * 🛤️ API_NODE_MAPPING
- */
-
-// 🔓 1. Public Handshake (Bypasses CSRF)
 app.get("/health", (req, res) => res.status(200).send("TITAN_ENGINE_STABLE"));
+
 app.use("/api/auth", authRoutes); 
-
-// 🔑 2. CSRF Token Generation
-app.get("/api/csrf-token", csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
-
-// 🔒 3. Protected Nodes (Optional CSRF in Development)
-const nodeSecurityGate = (req, res, next) => {
-  if (process.env.NODE_ENV !== "production") return next();
-  return csrfProtection(req, res, next);
-};
-
-app.use("/api/classes", nodeSecurityGate, classRoutes);
-app.use("/api/parent", nodeSecurityGate, parentRoutes);
-app.use("/api/analytics", nodeSecurityGate, analyticsRoutes);
-app.use("/api/assignments", nodeSecurityGate, assignmentRoutes);
-app.use("/api/submissions", nodeSecurityGate, submissionRoutes);
-app.use("/api/polls", nodeSecurityGate, pollRoutes);
-app.use("/api/broadcast", nodeSecurityGate, broadcastRoutes); 
-app.use("/api/messages", nodeSecurityGate, messageRoutes); 
-app.use("/api/attendance", nodeSecurityGate, attendanceRoutes);
-app.use("/api/grades", nodeSecurityGate, gradeRoutes); 
+app.use("/api/classes", classRoutes);
+app.use("/api/parent", parentRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/assignments", assignmentRoutes);
+app.use("/api/submissions", submissionRoutes);
+app.use("/api/polls", pollRoutes);
+app.use("/api/broadcast", broadcastRoutes); 
+app.use("/api/messages", messageRoutes); 
+app.use("/api/attendance", attendanceRoutes);
+app.use("/api/grades", gradeRoutes); 
 
 /**
  * 🤖 TITAN_CRON_AGENT
@@ -166,12 +131,7 @@ app.use((req, res, next) => {
 });
 
 // 🛠️ ERROR_HANDLER
-app.use((err, req, res, next) => {
-    if (err.code === 'EBADCSRFTOKEN') {
-        return res.status(403).json({ success: false, message: "Security Handshake Failed: Invalid CSRF Token" });
-    }
-    errorMiddleware(err, req, res, next);
-});
+app.use(errorMiddleware);
 
 /**
  * 🚀 ENGINE_IGNITION
@@ -187,7 +147,7 @@ server.listen(PORT, () => {
   📶 SOCKET   : LINK_STABLE [READY FOR CHAT]
   📊 GRADES   : TELEMETRY_ONLINE [SYNCED]
   🤖 AGENT    : CRON_SCHEDULED [WEEKLY_SYNC]
-  🔒 SECURITY : HELMET + CSRF + JWT_GATEWAY
+  🔒 SECURITY : HELMET + JWT_GATEWAY (CSRF Handshake Disabled)
   ================================================
   `);
 });
