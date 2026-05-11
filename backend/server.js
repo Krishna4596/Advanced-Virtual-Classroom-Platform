@@ -97,9 +97,17 @@ app.set("io", io);
  * 🔑 CSRF_PROTOCOL: Guarding Neural Integrity
  */
 // 🔥 FIX 2 & 3: Cookie check hata kar, header check lagaya
+/**
+ * 🔑 CSRF_PROTOCOL: Guarding Neural Integrity
+ */
 const csrfProtection = csurf({ 
-  cookie: false, 
+  cookie: {
+    httpOnly: true,
+    secure: true, // Render HTTPS par hai, isliye secure true zaroori hai
+    sameSite: 'none' // Vercel aur Render ke cross-domain connection ke liye
+  }, 
   value: (req) => {
+    // Client se token is header se read karega
     return req.headers['csrf-token']; 
   }
 });
