@@ -3,20 +3,19 @@ const nodemailer = require("nodemailer");
 const logger = require("./logger");
 
 /**
- * 📧 NEURAL MAIL INTERFACE (TITAN v4.2)
+ * 📧 NEURAL MAIL INTERFACE (TITAN v4.2) - BREVO UPGRADE
  * Ref: Report Section 3.3.1 (Identity Verification & MFA)
  * Purpose: Handling outbound SMTP communication for OTPs and academic alerts.
  */
 
-// 🛰️ TRANSPORTER CONFIGURATION: Optimized for Gmail SMTP
+// 🛰️ TRANSPORTER CONFIGURATION: Optimized for Brevo SMTP
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, 
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false, // 587 port ke liye hamesha false hota hai (TLS automatically start hota hai)
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Your 16-digit Google App Password
+    user: process.env.EMAIL_USER, // Render par Brevo ka SMTP Login dalna hai
+    pass: process.env.EMAIL_PASS, // Render par Brevo ka SMTP Password dalna hai
   },
   // 🛡️ PERFORMANCE: Use pooling for bulk transmissions (e.g., class announcements)
   pool: true,
@@ -29,7 +28,7 @@ transporter.verify((error, success) => {
   if (error) {
     logger.error("❌ Mail Engine Sync Failed: " + error.message);
   } else {
-    console.log("🚀 [TITAN-MAIL]: Ready for outbound transmissions.");
+    console.log("🚀 [TITAN-MAIL]: Ready for outbound transmissions via Brevo.");
   }
 });
 
@@ -68,7 +67,7 @@ const sendMail = async (to, subject, text) => {
     const info = await transporter.sendMail(mailOptions);
     logger.info(`📨 Email Dispatched: ${info.messageId} to ${to}`);
     return info;
-  } catch (error) { 
+  } catch (error) {
     logger.error("❌ SMTP Handshake Error: ", error.message);
     throw new Error("Failed to send verification email. Check SMTP settings.");
   }
