@@ -12,12 +12,11 @@ const logger = require("./logger");
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 587,
-  secure: false, // 587 port ke liye hamesha false hota hai (TLS automatically start hota hai)
+  secure: false, 
   auth: {
-    user: process.env.EMAIL_USER, // Render par Brevo ka SMTP Login dalna hai
-    pass: process.env.EMAIL_PASS, // Render par Brevo ka SMTP Password dalna hai
+    user: process.env.EMAIL_USER, // Render Env: Brevo SMTP Login
+    pass: process.env.EMAIL_PASS, // Render Env: Brevo SMTP Password
   },
-  // 🛡️ PERFORMANCE: Use pooling for bulk transmissions (e.g., class announcements)
   pool: true,
   maxConnections: 5,
   maxMessages: 100,
@@ -28,6 +27,7 @@ transporter.verify((error, success) => {
   if (error) {
     logger.error("❌ Mail Engine Sync Failed: " + error.message);
   } else {
+    // Is line se hi pata chalega naya code chala ya nahi
     console.log("🚀 [TITAN-MAIL]: Ready for outbound transmissions via Brevo.");
   }
 });
@@ -40,12 +40,11 @@ transporter.verify((error, success) => {
 const sendMail = async (to, subject, text) => {
   try {
     const mailOptions = {
-      // 👇 🔥 FIX: YAHAN APNI ASLI GMAIL ID DAALNI HAI, EMAIL_USER NAHI 🔥 👇
+      // ✅ Fixed: Brevo requires authorized sender email
       from: `"Titan Virtual Classroom" <krishprajapat9977@gmail.com>`,
       to,
       subject,
       text,
-      // 🎨 TITAN BRANDED TEMPLATE
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
           <div style="background-color: #1e293b; padding: 20px; text-align: center; color: #ffffff;">
@@ -74,4 +73,4 @@ const sendMail = async (to, subject, text) => {
   }
 };
 
-module.exports = sendMail;
+module.exports = sendMail; 
