@@ -42,6 +42,7 @@ const startRedisMonitoring = require("./monitoring/redisMonitor");
 const { socketHandler } = require("./socket/socketHandler"); 
 
 const app = express();
+app.set("trust proxy", 1); // 🔥 FIX: Trust first proxy for secure cookies behind load balancers  
 const server = http.createServer(app);
 
 // 🔌 INFRASTRUCTURE: Database & Monitoring
