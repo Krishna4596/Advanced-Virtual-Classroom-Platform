@@ -40,7 +40,8 @@ transporter.verify((error, success) => {
 const sendMail = async (to, subject, text) => {
   try {
     const mailOptions = {
-      from: `"Titan Virtual Classroom" <${process.env.EMAIL_USER}>`,
+      // 👇 🔥 FIX: YAHAN APNI ASLI GMAIL ID DAALNI HAI, EMAIL_USER NAHI 🔥 👇
+      from: `"Titan Virtual Classroom" <krishprajapat9977@gmail.com>`,
       to,
       subject,
       text,
