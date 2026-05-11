@@ -150,7 +150,7 @@ exports.verifyEmailOtp = asyncHandler(async (req, res) => {
 
 // --- 🔑 5. LOGIN (Identity Handshake) ---
 exports.login = asyncHandler(async (req, res) => {
-  console.log("👉 1. Login Request Aayi:", req.body.email);
+  console.log("👉 [1] Login request received for:", req.body.email);
   const { email, password } = req.body;
   
   if (!email || !password) return errorResponse(res, "Missing login credentials", 400);
@@ -159,35 +159,36 @@ exports.login = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
   if (!user || !(await user.comparePassword(password))) {
-    console.log("❌ 2. Password Match Fail Ya User Nahi Mila");
+    console.log("❌ [2] Authentication Failed: Invalid credentials or user not found.");
     return errorResponse(res, "Credential Error: Handshake Denied", 401);
   }
 
   if (!user.isVerified) return errorResponse(res, "Security Lock: Verify email first to activate node", 403);
 
-  console.log("✅ 3. Password Sahi Hai, OTP Generate Kar Rahe Hain...");
+  console.log("✅ [3] Credentials verified. Generating OTP sequence...");
   const otp = generateOTP();
   
   try {
-    console.log("⏳ 4. MongoDB mein OTP Save Kar Rahe Hain...");
+    console.log("⏳ [4] Persisting OTP to MongoDB...");
     await LoginOTP.findOneAndUpdate(
       { user: user._id }, 
       { otp, expiresAt: new Date(Date.now() + 15 * 60 * 1000) }, 
-      { upsert: true, returnDocument: 'after' } // Warning fixed
+      { upsert: true, returnDocument: 'after' } 
     );
-    console.log("✅ 5. MongoDB mein OTP Save Ho Gaya!");
+    console.log("✅ [5] OTP successfully saved to database.");
   } catch (dbError) {
-    console.log("🔴 MongoDB ERROR:", dbError.message);
+    console.log("🔴 [DB_ERROR]: Failed to save OTP:", dbError.message);
     return errorResponse(res, "Database failed to save OTP", 500);
   }
 
   try {
-    console.log("⏳ 6. Email Bhejne Ki Koshish Kar Rahe Hain (Nodemailer)...");
+    console.log("⏳ [6] Initiating email transmission via Nodemailer...");
     await sendMail(user.email, "TITAN - Login Code", `Your login code is: ${otp}`);
-    console.log("✅ 7. Email Bhej Diya Gaya!");
+    console.log("✅ [7] Email successfully dispatched!");
     return successResponse(res, "MFA Challenge sent to Email.");
   } catch (mailError) {
-    console.log("🔴 EMAIL ERROR:", mailError.message);
+    console.log("🔴 [EMAIL_ERROR]:", mailError.message);
+    // Returning success even on mail failure allows Dev Mode testing to continue
     return successResponse(res, "MFA Challenge (Dev Mode Active).", { devOtp: otp });
   }
 });

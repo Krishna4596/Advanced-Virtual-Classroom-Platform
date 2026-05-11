@@ -68,7 +68,7 @@ const sendMail = async (to, subject, text) => {
     const info = await transporter.sendMail(mailOptions);
     logger.info(`📨 Email Dispatched: ${info.messageId} to ${to}`);
     return info;
-  } catch (error) {
+  } catch (error) { 
     logger.error("❌ SMTP Handshake Error: ", error.message);
     throw new Error("Failed to send verification email. Check SMTP settings.");
   }
