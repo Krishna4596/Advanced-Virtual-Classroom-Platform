@@ -1,9 +1,9 @@
 /**
  * ============================================================
- * 📹 TITAN VIDEO STAGE (v11.2 - The "Zoom-Killer" Auto-Grid Build)
- * Fixes: Chat Button moved to Command Deck, controlled Drawer.
- * Features: Auto-Scaling CSS Grid, Mobile Drawer Chat, Spotlight,
- * Global Hand Raise Sync, and Thumbnail Strip for Pinned mode.
+ * 📹 TITAN VIDEO STAGE (v11.3 - The Flawless Mobile Build)
+ * Fixes: Phantom 'X' Button Hidden, Added Mobile Backdrop Click,
+ * Prevented Accidental Auto-Opens.
+ * Features: Auto-Grid, Command Deck Chat Toggle, Spotlight.
  * ============================================================
  */
 
@@ -18,7 +18,7 @@ import PollSystem from "./PollSystem";
 import { 
   Mic, MicOff, Video, VideoOff, PhoneOff, Users, 
   MessageSquare, ShieldAlert, Activity, Crown, Zap,
-  ArrowRight, PenTool, BarChart2, X, Hand, Maximize, Minimize, UserX
+  PenTool, BarChart2, X, Hand, Maximize, Minimize, UserX
 } from "lucide-react";
 
 // 🎬 SUB-COMPONENT: Reusable Video Node (with Hover Actions)
@@ -104,8 +104,8 @@ function VideoRoom() {
   const [raisedHands, setRaisedHands] = useState({}); 
   const isMyHandRaised = !!raisedHands[myId];
 
-  // HUD State Toggles
-  const [isChatOpen, setIsChatOpen] = useState(false); // Default is false, will not open automatically
+  // HUD State Toggles (All strictly false by default)
+  const [isChatOpen, setIsChatOpen] = useState(false); 
   const [isBoardOpen, setIsBoardOpen] = useState(false);
   const [isPollsOpen, setIsPollsOpen] = useState(false);
   
@@ -289,8 +289,6 @@ function VideoRoom() {
               </h2>
             </div>
           </div>
-          
-          {/* Removed Chat Button from Header */}
         </header>
 
         {peerError && (
@@ -364,7 +362,6 @@ function VideoRoom() {
         <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-auto">
           <div className="bg-slate-950/80 backdrop-blur-2xl px-2 sm:px-6 py-2 sm:py-3 rounded-[2rem] sm:rounded-3xl border border-white/10 flex items-center justify-center gap-1 sm:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-x-auto max-w-[90vw]">
             
-            {/* Added Chat Button to Command Deck */}
             <button onClick={() => setIsChatOpen(!isChatOpen)} className={`p-2.5 sm:p-4 rounded-[1.2rem] sm:rounded-2xl transition-all active:scale-90 ${isChatOpen ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Toggle Chat">
               <MessageSquare size={18} className="sm:w-5 sm:h-5" />
             </button>
@@ -416,13 +413,24 @@ function VideoRoom() {
         </div>
       )}
 
-      {/* 🔥 FIX: RIGHT SIDEBAR: CHAT Drawer Mobile Ready */}
-      <aside className={`absolute top-0 right-0 h-full w-[85%] max-w-[400px] bg-slate-950 border-l border-white/5 z-[100] transition-transform duration-500 ease-in-out ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        {/* Mobile Close Button over the Chat drawer */}
-        <button onClick={() => setIsChatOpen(false)} className="absolute top-4 -left-12 bg-slate-800 p-3 rounded-l-xl z-[101] shadow-[[-10px_0_20px_rgba(0,0,0,0.5)]] flex items-center justify-center hover:bg-slate-700 transition lg:hidden">
+      {/* 🔥 NEW: MAGIC BACKDROP FOR MOBILE */}
+      {isChatOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] lg:hidden transition-opacity duration-500 cursor-pointer"
+          onClick={() => setIsChatOpen(false)}
+          title="Tap to close chat"
+        ></div>
+      )}
+
+      {/* 💬 RIGHT SIDEBAR: CHAT Drawer */}
+      <aside className={`fixed top-0 right-0 h-full w-[85%] sm:w-[350px] lg:w-[400px] bg-slate-950 border-l border-white/5 z-[100] transition-transform duration-500 ease-in-out ${isChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* 🔥 FIX: Phantom Button logic updated. Only shows/works when chat is OPEN */}
+        <button 
+          onClick={() => setIsChatOpen(false)} 
+          className={`absolute top-4 -left-12 bg-slate-800 p-3 rounded-l-xl z-[101] shadow-[-10px_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:bg-red-500 transition lg:hidden ${isChatOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        >
           <X className="text-white w-5 h-5" />
         </button>
-        {/* Close button for Desktop inside the header if needed, but 'X' handles mobile */}
         <Chat classId={roomId} />
       </aside>
 
