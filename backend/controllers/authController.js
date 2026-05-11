@@ -150,29 +150,44 @@ exports.verifyEmailOtp = asyncHandler(async (req, res) => {
 
 // --- 🔑 5. LOGIN (Identity Handshake) ---
 exports.login = asyncHandler(async (req, res) => {
+  console.log("👉 1. Login Request Aayi:", req.body.email);
   const { email, password } = req.body;
+  
   if (!email || !password) return errorResponse(res, "Missing login credentials", 400);
 
   const normalizedEmail = email?.toLowerCase()?.trim();
   const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
   if (!user || !(await user.comparePassword(password))) {
+    console.log("❌ 2. Password Match Fail Ya User Nahi Mila");
     return errorResponse(res, "Credential Error: Handshake Denied", 401);
   }
 
   if (!user.isVerified) return errorResponse(res, "Security Lock: Verify email first to activate node", 403);
 
+  console.log("✅ 3. Password Sahi Hai, OTP Generate Kar Rahe Hain...");
   const otp = generateOTP();
-  await LoginOTP.findOneAndUpdate(
-    { user: user._id }, 
-    { otp, expiresAt: new Date(Date.now() + 15 * 60 * 1000) }, 
-    { upsert: true, new: true }
-  );
+  
+  try {
+    console.log("⏳ 4. MongoDB mein OTP Save Kar Rahe Hain...");
+    await LoginOTP.findOneAndUpdate(
+      { user: user._id }, 
+      { otp, expiresAt: new Date(Date.now() + 15 * 60 * 1000) }, 
+      { upsert: true, returnDocument: 'after' } // Warning fixed
+    );
+    console.log("✅ 5. MongoDB mein OTP Save Ho Gaya!");
+  } catch (dbError) {
+    console.log("🔴 MongoDB ERROR:", dbError.message);
+    return errorResponse(res, "Database failed to save OTP", 500);
+  }
 
   try {
+    console.log("⏳ 6. Email Bhejne Ki Koshish Kar Rahe Hain (Nodemailer)...");
     await sendMail(user.email, "TITAN - Login Code", `Your login code is: ${otp}`);
+    console.log("✅ 7. Email Bhej Diya Gaya!");
     return successResponse(res, "MFA Challenge sent to Email.");
   } catch (mailError) {
+    console.log("🔴 EMAIL ERROR:", mailError.message);
     return successResponse(res, "MFA Challenge (Dev Mode Active).", { devOtp: otp });
   }
 });
