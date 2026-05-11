@@ -65,7 +65,9 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(cors({
   origin: FRONTEND_URL,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  // 🔥 FIX 1: Frontend ko 'CSRF-Token' header bhejne ki permission de di
+  allowedHeaders: ["Content-Type", "Authorization", "CSRF-Token"]
 }));
 
 app.use(express.json({ limit: "50mb" })); 
@@ -94,12 +96,12 @@ app.set("io", io);
 /**
  * 🔑 CSRF_PROTOCOL: Guarding Neural Integrity
  */
+// 🔥 FIX 2 & 3: Cookie check hata kar, header check lagaya
 const csrfProtection = csurf({ 
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-  } 
+  cookie: false, 
+  value: (req) => {
+    return req.headers['csrf-token']; 
+  }
 });
 
 /**

@@ -1,3 +1,4 @@
+//frontend/src/api/api.js
 /**
  * ============================================================
  * 🛡️ TITAN API GATEWAY (v5.3 - Self-Healing Build)
@@ -45,7 +46,8 @@ API.interceptors.request.use(async (config) => {
   if (!["get", "head", "options"].includes(config.method?.toLowerCase())) {
     let csrfToken = cachedCsrfToken || (await fetchCsrfToken());
     if (csrfToken) {
-      config.headers["X-CSRF-Token"] = csrfToken;
+      // 🔥 FIX: 'X-CSRF-Token' hata kar 'CSRF-Token' kiya, taaki backend se match ho!
+      config.headers["CSRF-Token"] = csrfToken; 
     }
   }
 
@@ -61,7 +63,6 @@ API.interceptors.request.use(async (config) => {
 API.interceptors.response.use(
   (response) => {
     // 🔥 FIX 1: SILENT TOKEN RECOVERY SYNC
-    // Agar backend ne middleware mein naya token generate kiya hai, toh usko pakdo
     const newAccessToken = response.headers["x-new-access-token"];
     if (newAccessToken) {
       console.log("🔄 TITAN_SIGNAL: Session seamlessly rotated & updated.");
@@ -74,7 +75,6 @@ API.interceptors.response.use(
     const isAuthCheck = originalRequest.url.includes("/auth/me");
 
     // 🔄 FIX 2: PERMANENT SESSION DEATH HANDLING
-    // Agar backend se 401 aata hai ab, iska matlab Refresh Token bhi mar gaya hai.
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthCheck) {
       console.warn("⚠️ TITAN_SIGNAL: Session Links Permanently Expired.");
       cachedCsrfToken = null;
@@ -90,7 +90,8 @@ API.interceptors.response.use(
       cachedCsrfToken = null;
       const newToken = await fetchCsrfToken();
       if (newToken) {
-        originalRequest.headers["X-CSRF-Token"] = newToken;
+        // 🔥 FIX: Yahan bhi 'X-CSRF-Token' ki jagah 'CSRF-Token' kar diya
+        originalRequest.headers["CSRF-Token"] = newToken;
         return axios(originalRequest);
       }
     }
